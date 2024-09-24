@@ -29,10 +29,17 @@ This ENSIP intruduces two new types of new multicodecs, uri and data-url.
 
 >[!WARNING] 
 >These protoCodes are not approved yet!.
+>https://github.com/multiformats/multicodec/pull/353
 
 uri: 0xf2
 
 data-uri: 0xf3
+
+Until the protoCodes are approved the "Private Use Area" temporary codes should be used.
+
+uri: 0x3000f2
+
+data-uri: 0x3000f3
 
 ## New Formats 
 **URI**
