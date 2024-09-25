@@ -83,7 +83,12 @@ If the URI is a data URL the web gateway will not resolve the data URL and inste
 
 When resolving Data URLs, the URL of the request to the gateway is only used to determine the ENS name. Any path or query data of the request URL is ignored. For example `https://name.eth.limo` returns the same data URL as `https://name.eth.limo/a/b/c`.
 
+# Rationale 
 
+[ENSIP-7](https://github.com/ensdomains/ensips/blob/master/ensips/7.md) makes it possible to resolve contenthash records, allowing decentralized websites using decentralized storage such as IPFS and Swarm to be resolved using ENS names. Many users, however, would prefer to simply redirect their ENS name to a URI. It is currently possible to use the text record 'url'; however, this has traditionally been used as a profile record to link to a website of the user, for example, to a blog or homepage. This ENSIP makes it possible to redirect the ENS name to a URI using the contenthash field. In some cases, users want to be able to store entire single-page websites or images onchain. With the addition of the Data URL address type, it is possible to resolve a decentralized website that is fully onchain, avoiding the need to worry about pinning data, for example, using IPFS.
+
+An ENSIP was previously proposed by NameSys on the ENS DAO forum, [[Draft] ENSIP-17: DataURI Format in Contenthash](https://discuss.ens.domains/t/draft-ensip-17-datauri-format-in-contenthash/18048/7). Several methods for encoding that Data URL were discussed, including bypassing the multicodec and using the IPFS multicodec format among other methods. Adding two new protoCodes was also discussed, and this ENSIP takes that approach in order not to overload the top-level IPFS codec with other subtypes that aren’t necessarily related to IPFS.
+  
 # Copyright
 Copyright and related rights waived via [CC0](../LICENSE.md).
 
