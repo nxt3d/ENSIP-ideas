@@ -91,7 +91,7 @@ An ENSIP was previously proposed by NameSys on the ENS DAO forum, [[Draft] ENSIP
 
 # Security Considerations
 
-Data URLs and URIs are intended for use in web browsers or other user-facing clients, so their security considerations are similar to any web application. However, onchain Data URLs can be safer than a traditional DNS website because the content is stored entirely onchain, preventing attackers from altering or compromising the website.
+Data URLs and URIs are intended for use in web browsers or other user-facing clients, so their security considerations are similar to any web application. However, onchain Data URLs can be safer than a traditional DNS website because the content can be stored entirely onchain, preventing attackers from altering or compromising the website.
   
 # Copyright
 
