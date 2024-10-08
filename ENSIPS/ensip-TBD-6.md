@@ -19,6 +19,8 @@ With text records, verifying data can be challenging, as users can change resolv
 
 # Specification
 
+The key words “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL NOT”, “SHOULD”, “SHOULD NOT”, “RECOMMENDED”, “MAY”, and “OPTIONAL” in this document are to be interpreted as described in RFC 2119.
+
 This ENSIP introduces a new record type, `hook`, which enables the resolution of secure, verified onchain data, including ZK-based credentials, and extends ENSIP-5 (Text Records) to support more complex data requirements. 
 
 ```
@@ -37,8 +39,6 @@ When resolving a `hook`, clients MUST supply the address of a resolver and the `
 
 While `hook` keys build upon the general structure defined by ENSIP-5, they extend its functionality. Specifically, a key may include a `:` after the ENSIP-5-compliant portion, followed by any additional format, allowing for custom protocol data and expanded use cases. For example, `eth.isprime:17` uses `eth.isprime` as a base key and appends `:17` to accommodate user-specific protocols and more complex data structures.
 
-### Compliance
-This specification follows RFC 2119 and RFC 8170. Key terms like "MUST" and "MAY" are defined to ensure consistent, interoperable implementations. The `hook` record type provides a secure and adaptable foundation for expanded ENS profiles, building upon and extending the ENS framework.
 
 
 # Rationale 
