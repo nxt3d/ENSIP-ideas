@@ -1,6 +1,6 @@
 ---
 ensip: TBD
-title: Hooks: a New ENS Record Type for Resolving Onchain Data Including ZK-based Credentials. 
+title: Hooks
 status: Idea
 type: Standards Track
 author: Prem Makeig (premm.eth) <premm@unruggable.com>, raffy.eth <raffy@unruggable.com>
