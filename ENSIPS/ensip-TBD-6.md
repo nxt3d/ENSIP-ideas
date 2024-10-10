@@ -9,7 +9,7 @@ created: 2024-10-7
 
 # Abstract 
 
-This ENSIP introduces `hooks`, a new ENS field to support secure onchain data resolution, including cross-chain data access and ZK-based credentials. Hooks expand ENS functionality beyond simple text resolution, establishing a framework for resolving verified onchain data on ENS names and profiles.
+This ENSIP introduces `hooks`, a new ENS field to support secure onchain data resolution including ZK-based credentials. Hooks expand ENS functionality beyond simple text resolution, establishing a framework for resolving verified onchain data on ENS names and profiles.
 
 # Motivation
 
