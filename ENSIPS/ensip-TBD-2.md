@@ -13,7 +13,7 @@ This ENSIP extends the `contenthash` field to support two additional content typ
 
 # Motivation
 
-The `contenthash` field has become the standard for using ENS names for decentralized websites and dapps. With ENSIP-10 and CCIP-Read (EIP-3668), resolving ENS records from L2s and offchain is now possible, reducing the cost of using the `contenthash` field. This makes adopting the [data URL](https://datatracker.ietf.org/doc/html/rfc2397) standard feasible, allowing content like webapps, images, and videos to be stored onchain or offchain. While ENS names are traditionally linked with decentralization, CCIP-Read has increased their flexibility, enabling use cases like centralized offchain names. However, the `contenthash` field still supports only decentralized storage. This ENSIP also introduces a new URL content type for the `contenthash` field, allowing browsers to redirect to a standard URI when loading an ENS name.
+The `contenthash` field has become the standard for using ENS names for decentralized websites and dapps. With ENSIP-10 and CCIP-Read (EIP-3668), resolving ENS records from L2s reduces the cost of using the `contenthash` field. This makes adopting the [data URL](https://datatracker.ietf.org/doc/html/rfc2397) standard feasible, allowing content like webapps, images, and videos to be stored onchain. This ENSIP also introduces a new URI content type for the `contenthash` field, allowing browsers to redirect to a standard URI when loading an ENS name. While URIs, such as ethereum.org, are not decentarlized or onchain, it makes ENS names more reverse compatible with Web2 and is a conventience for users. 
 
 # Specification
 
@@ -48,22 +48,19 @@ Format: `uvarint(codec1) + <URI as utf8 bytes>`
 
 **Data URL**
 
-Format: `uvarint(codec2) + byte(length(MIME)) + <MIME bytes as ascii> + <DATA as bytes>`
+For Data URL we use ENSIP-TBD-6 Hooks, to direct clients to a smart contract with a specified contract address and coinType (chain id), to resolve the data for the Data URL. 
 
->[!Note] 
->`MIME` cannot exceed 255 bytes
+The format of the hook is the abi encoded bytes of the function:
 
-Comment: check on the syntax, to unifiy it with other ENSIPs. 
+```
+function hook(bytes32 node, string calldata key, address resolver, uint256 coinType) public returns (string memory)
+```
+`node` - the node of the ENS name
+`key` - a string comprising "" + <Reverse ENS Name i.e. eth.vitalik> + ":" + "dataURL" + <Resolver Address> + <coinType> + ""  
+`resolver` - the address of the smart contract (resolver) where the data can be resolved
+`coinType` - the coinType (ENSIP-11) of the chain, which also includes EVM chain ids. 
 
-## Web Application View 
-
-**URI:** `$URI` (literal)
-
-e.g. https://domain.com/a/b/c
-
-**Data URL:** `data:$MIME;base64,${base64_encode($DATA)}`
-
-e.g. data:text/plain;base64,SGVsbG8sIFdvcmxkIQ==	
+Format: `uvarint(codec2) + <ABI encoded hook function call as bytes>`
 
 ## Web Gateway Resolution (e.g. .limo)
 
@@ -81,7 +78,7 @@ If the URI is a data URL the web gateway will not resolve the data URL and inste
 
 * The HTTP response MUST be of `Content-type: $MIME`.
 
-When resolving Data URLs, the URL of the request to the gateway is only used to determine the ENS name. Any path or query data of the request URL is ignored. For example `https://name.eth.limo` returns the same data URL as `https://name.eth.limo/a/b/c`.
+When resolving Data URLs, the URL of the request to the gateway is only used to determine the ENS name. Any path or query data of the request URL is ignored. For example `https://name.eth.limo` returns the same data URL as `https://name.eth.limo/a/b/c`. Single page applications (SPA) that are resovled in the browser may use the path information if necesasry to modify the view of the SPA. 
 
 # Rationale 
 
