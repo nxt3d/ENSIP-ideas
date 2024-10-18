@@ -53,7 +53,10 @@ function hook(bytes32 node, string calldata key, address resolver, uint256 coinT
 - `key` – a string comprising: 
 
 ```
-"" + <Reverse ENS Name i.e. eth.vitalik> + ":" + "dataURL" + <Resolver Address> + <coinType> + ""
+"" + <Reverse ENS Name> + ":dataURL"
+
+e.g. "eth.vitalik:dataURL"
+
 ```
 - `resolver` – the address of the smart contract (resolver) where the data can be resolved
 - `coinType` – the coinType (ENSIP-11) of the chain, which also includes EVM chain ids. 
