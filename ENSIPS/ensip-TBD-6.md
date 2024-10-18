@@ -40,10 +40,10 @@ When resolving a hook from an ENS name, a client MUST find the resolver address 
 
 ## Resolver Validation 
 
-The resolver smart contract MUST verify that the hook contract address and coinType match its own address and coinType (chain ID). If the check fails, the contract MUST revert with a custom error called `UnknownHook`, providing the expected and provided values for both the address and coinType. Additionally, contracts supporting the HookResolver interface MUST return `true` when `supportsInterface()` is called with the interface ID corresponding to HookResolver. The required interface is as follows:
+The resolver smart contract MUST verify that the hook contract address and coinType match its own address and coinType (chain ID). If the check fails, the contract MUST revert with a custom error called `UnknownHook`, providing the expected and provided values for both the address and coinType. Additionally, contracts supporting the `IHookResolver` interface MUST return `true` when `supportsInterface()` is called with the interface ID corresponding to `IHookResolver`. The required interface is as follows:
 
 ```
-interface HookResolver {
+interface IHookResolver {
     
     // Custom error for incorrect resolver address and coinType
     error UnknownHook(address expectedResolver, address providedResolver, uint256 expectedCoinType, uint256 providedCoinType);
