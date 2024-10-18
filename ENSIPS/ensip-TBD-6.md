@@ -38,7 +38,19 @@ The resolver must conform to the Extended Resolver interface as specified in ENS
 
 When resolving a hook from an ENS name, a client MUST find the resolver address of the ENS name (ENSIP-1 or ENSIP-10). The client MUST ensure that the resolver of the ENS name matches the resolver specified in the hook, including the coinType (ENSIP-11). This ensures that if the ENS name owner changes their resolver, the hook will no longer resolve, thereby protecting clients who depend on the resolved data from receiving spoofed or incorrect information.
 
-### Hook function parameters
+## Resolver Validation 
+
+The resolver smart contract MUST verify that the hook contract address and coinType match its own address and coinType (chain ID). If the check fails, the contract MUST revert with a custom error called `UnknownHook`, providing the expected and provided values for both the address and coinType. Additionally, contracts supporting the HookResolver interface MUST return `true` when `supportsInterface()` is called with the interface ID corresponding to HookResolver. The required interface is as follows:
+
+```
+interface HookResolver {
+    
+    // Custom error for incorrect resolver address and coinType
+    error UnknownHook(address expectedResolver, address providedResolver, uint256 expectedCoinType, uint256 providedCoinType);
+}
+```
+
+## Hook function parameters
 
 The `hook` function takes the following parameters:
 - `node`: The ENS node (namehash) for which the `hook` is being queried.
