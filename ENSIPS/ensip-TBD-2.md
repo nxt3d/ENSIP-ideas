@@ -13,7 +13,7 @@ This ENSIP extends the `contenthash` field to support two additional content typ
 
 # Motivation
 
-The `contenthash` field has become the standard for using ENS names for decentralized websites and dapps. With ENSIP-10 and CCIP-Read (EIP-3668), resolving ENS records from L2s reduces the cost of using the `contenthash` field. This makes adopting the [data URL](https://datatracker.ietf.org/doc/html/rfc2397) standard feasible, allowing content like webapps, images, and videos to be stored onchain. This ENSIP also introduces a new URI content type for the `contenthash` field, allowing browsers to redirect to a standard URI when loading an ENS name. While URIs, such as ethereum.org, are not decentarlized or onchain, it makes ENS names more reverse compatible with Web2 and is a conventience for users. 
+The `contenthash` field has become the standard for using ENS names for decentralized websites and dapps. With ENSIP-10 and CCIP-Read (EIP-3668), resolving ENS records from L2s reduces the cost of using the `contenthash` field. This makes adopting the [data URL](https://datatracker.ietf.org/doc/html/rfc2397) standard feasible, allowing content like webapps, images, and videos to be stored onchain. This ENSIP also introduces a new URI content type for the `contenthash` field, allowing browsers to redirect to a standard URI when loading an ENS name. While URIs, such as ethereum.org, are not decentarlized or onchain, it makes ENS names more reverse compatible with Web2 and is a convenience for users. 
 
 # Specification
 
@@ -25,21 +25,13 @@ ENSIP-7 introduced the `contenthash` field for resolving ENS names to content ho
 
 protoCodes and their meanings are specified in the [multiformats/multicodec](https://github.com/multiformats/multicodec) repository.
 
-This ENSIP intruduces two new types of new multicodecs, uri and data-url.  
+This ENSIP intruduces two new types of new multicodecs, uri and eth-calldata (which will be used for the Data URL).  
 
->[!WARNING] 
->These protoCodes are not approved yet!.
->https://github.com/multiformats/multicodec/pull/353
-
-uri: 0xf2
-
-data-uri: 0xf3
-
-Until the protoCodes are approved the "Private Use Area" temporary codes should be used.
+Until final protoCodes are approved the "Private Use Area" temporary codes should be used.
 
 uri: 0x3000f2
 
-data-uri: 0x3000f3
+eth-calldata: 0x30009b
 
 ## New Formats 
 **URI**
@@ -50,7 +42,7 @@ Format: `uvarint(codec1) + <URI as utf8 bytes>`
 
 For Data URL we use ENSIP-TBD-6 Hooks, to direct clients to a smart contract with a specified contract address and coinType (chain id), to resolve the data for the Data URL. 
 
-The format of the hook is the abi encoded bytes of the function:
+The format of the hook is the abi encoded bytes (Ethereum calldata) of the function:
 
 ```
 function hook(bytes32 node, string calldata key, address resolver, uint256 coinType) public returns (string memory)
@@ -60,7 +52,7 @@ function hook(bytes32 node, string calldata key, address resolver, uint256 coinT
 `resolver` - the address of the smart contract (resolver) where the data can be resolved
 `coinType` - the coinType (ENSIP-11) of the chain, which also includes EVM chain ids. 
 
-Format: `uvarint(codec2) + <ABI encoded hook function call as bytes>`
+Format: `uvarint(codec2) + <ABI encoded 'hook' function call as bytes>`
 
 ## Web Gateway Resolution (e.g. .limo)
 
@@ -70,7 +62,7 @@ Format: `uvarint(codec2) + <ABI encoded hook function call as bytes>`
 	
 * The response `Location` MUST be `$URI` eg. https://domain.com/a/b.c?d=e.
 
-If the URI is a data URL the web gateway will not resolve the data URL and instead will redirect the browser to the data URL. 
+A reasonable limit may be placed by clients on the number of characters in the URI, but at least 256 bytes of UTF-8 characters should be suppported. 
 
 **Data URL:**
 
@@ -82,9 +74,11 @@ When resolving Data URLs, the URL of the request to the gateway is only used to 
 
 # Rationale 
 
-[ENSIP-7](https://github.com/ensdomains/ensips/blob/master/ensips/7.md) makes it possible to resolve contenthash records, allowing decentralized websites using decentralized storage such as IPFS and Swarm to be resolved using ENS names. Many users, however, would prefer to simply redirect their ENS name to a URI. It is currently possible to use the text record 'url'; however, this has traditionally been used as a profile record to link to a website of the user, for example, to a blog or homepage. This ENSIP makes it possible to redirect the ENS name to a URI using the contenthash field. In some cases, users want to be able to store entire single-page websites or images onchain. With the addition of the Data URL address type, it is possible to resolve a decentralized website that is fully onchain, avoiding the need to worry about pinning data, for example, using IPFS.
+[ENSIP-7](https://github.com/ensdomains/ensips/blob/master/ensips/7.md) makes it possible to resolve contenthash records, allowing decentralized websites using decentralized storage such as IPFS and Swarm to be resolved using ENS names. Many users, however, would prefer to simply redirect their ENS name to a URI. It is currently possible to include a URI in the text record 'url'; however, this has traditionally been used as a profile record to link to a website of the user, for example, a blog or homepage. This ENSIP makes it possible to redirect the ENS name to a URI using the contenthash field, intended for resolving within the web browser. With the addition of the Data URL contenthash type, it is possible to resolve a decentralized website that is fully onchain, avoiding the need for pinning data, for example, using IPFS.
 
-An ENSIP was previously proposed by NameSys on the ENS DAO forum, [[Draft] ENSIP-17: DataURI Format in Contenthash](https://discuss.ens.domains/t/draft-ensip-17-datauri-format-in-contenthash/18048/7). Several methods for encoding that Data URL were discussed, including bypassing the multicodec and using the IPFS multicodec format among other methods. Adding two new protoCodes was also discussed, and this ENSIP takes that approach in order not to overload the top-level IPFS codec with other subtypes that aren’t necessarily related to IPFS.
+An ENSIP was previously proposed by NameSys on the ENS DAO forum, [[Draft] ENSIP-17: DataURI Format in Contenthash](https://discuss.ens.domains/t/draft-ensip-17-datauri-format-in-contenthash/18048/7). Several methods for encoding that Data URL were discussed, including bypassing the multicodec and using the IPFS multicodec format among other methods. Adding two new protoCodes was also discussed, and this ENSIP takes that approach to avoid overloading the top-level IPFS codec with other subtypes that aren’t necessarily related to IPFS. Previously, a new data-url protoCode was proposed; however, it became necessary to separate the data URL contenthash and the onchain data, and this ENSIP takes the approach of using an Ethereum calldata protoCode with a special hook to resolve data URIs.
+
+
 
 # Security Considerations
 
