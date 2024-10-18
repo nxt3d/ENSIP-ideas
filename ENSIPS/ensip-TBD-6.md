@@ -45,7 +45,7 @@ The resolver smart contract MUST verify that the hook contract address and coinT
 ```
 interface IHookResolver {
     
-    // Custom error for incorrect resolver address and coinType
+    // Custom error for incorrect resolver address or coinType
     error UnknownHook(address expectedResolver, address providedResolver, uint256 expectedCoinType, uint256 providedCoinType);
 }
 ```
