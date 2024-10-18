@@ -48,7 +48,7 @@ The format of the hook is the abi encoded bytes (Ethereum calldata) of the funct
 function hook(bytes32 node, string calldata key, address resolver, uint256 coinType) public returns (string memory)
 ```
 `node` - the node of the ENS name
-`key` - a string comprising "" + <Reverse ENS Name i.e. eth.vitalik> + ":" + "dataURL" + <Resolver Address> + <coinType> + ""  
+`key` - a string comprising "" \+ <Reverse ENS Name i.e. eth.vitalik> \+ ":" \+ "dataURL" \+ <Resolver Address> \+ <coinType> \+ ""
 `resolver` - the address of the smart contract (resolver) where the data can be resolved
 `coinType` - the coinType (ENSIP-11) of the chain, which also includes EVM chain ids. 
 
