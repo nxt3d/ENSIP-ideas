@@ -57,7 +57,7 @@ function hook(bytes32 node, string calldata key, address resolver, uint256 coinT
 
 Format: `uvarint(codec2) + <ABI encoded 'hook' function call as bytes>`
 
-## Web Gateway Resolution (e.g. .limo)
+## Web Gateway Resolution (e.g. eth.limo)
 
 **URI:** 
 
