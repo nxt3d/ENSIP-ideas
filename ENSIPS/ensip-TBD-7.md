@@ -2,7 +2,7 @@
 ensip: TBD
 title: ENS Resolver Storage Interface
 status: Idea
-type: ENSRC
+type: Core
 author: Prem Makeig (premm.eth) <premm@unruggable.com>, raffy.eth <raffy@unruggable.com>
 created: 2024-10-21
 ---
