@@ -53,7 +53,7 @@ interface IHookResolver {
 ## Hook function parameters
 
 The `hook` function takes the following parameters:
-- `node`: The ENS node (namehash) for which the `hook` is being queried.
+- `node`: The ENS node (namehash) for which the `hook` is being used. Smart contracts that resolve hooks directly without first resolving an ENS name can use the node value as a bytes32 id (which can be converted to uint256), for example of an id of an NFT. 
 - `key`: A string representing the specific key for a key-value pair. Keys MUST follow ENSIP-5 standards but may include an exception: the ENSIP-5-compliant key can be appended with a `:` followed by any format, enabling user-developed protocols and extended functionality (e.g., `eth.isprime:17`).
 - `resolver`: The address of the resolver smart contract.
 - `chainId`: An unsigned integer that specifies the chain Id for which the resolver is valid.
