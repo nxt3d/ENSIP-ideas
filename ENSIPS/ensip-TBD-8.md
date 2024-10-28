@@ -19,7 +19,7 @@ By introducing a coinType priority list, we provide a standardized method for us
 
 ## Specification
 
-### `cointype-priority-list` Text Record
+### Cointype Priority List Text Record
 
 Defines the use of the `cointype-priority-list` record.  
 This record aims to store a prioritized list of `coinType` identifiers, [ENSIP-11](https://docs.ens.domains/ensip/ensip-11)), indicating a preferred list of blockchains.  
