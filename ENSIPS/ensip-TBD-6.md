@@ -27,17 +27,17 @@ The key words “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL 
 
 This ENSIP introduces a new resolver field, `hook`, which enables the resolution of secure, verified onchain data, including ZK-based credentials and interactions with AI agents.
 
-<code>
+```
 function hook(bytes32 node, string calldata key, address resolver, uint256 chainId) public returns (string memory)
-</code>
+```
 
 The hook is resolved against a smart contract (resolver) that supports the Extended Resolver interface specified in ENSIP-10, using the `resolve` function. A smart contract that supports `hooks` does not need to follow ENSIP-10 beyond implementing the Extended Resolver interface; however, it can. To resolve a hook, the `resolve` function is called with the encoded calldata of the `hook` function (function signature `0x6643fd22`). If the resolver is called directly (not in the context of resolving an ENS name), the `name` parameter from the resolve function can be left blank.
 
-<code>
+```
 interface IExtendedResolver {
     function resolve(bytes calldata name, bytes calldata data) external view returns (bytes memory);
 }
-</code>
+```
 
 The resolver must conform to the Extended Resolver interface as specified in ENSIP-10 and must return bytes when the `resolve` function is successfully called. It MUST return `true` when `supportsInterface()` (EIP-165) is called on it with the interface's ID, `0x9061b923`. Resolvers that support the `hook` field may also choose to have a public function called `hook`, with identical inputs and output results as resolving the hook field with the `resolve` function, but it is not required.
 
@@ -47,13 +47,13 @@ When resolving a hook from an ENS name, a client MUST find the resolver address 
 
 The resolver smart contract MUST verify that the hook contract address and chain ID match its own address and chain ID. If the check fails, the contract MUST revert with a custom error called `UnknownHook`, providing the expected and provided values for both the address and chain ID. Additionally, hook resolvers must implement the `IHookResolver` interface and MUST return `true` when `supportsInterface()` is called with the interface ID corresponding to `IHookResolver`. The required interface is as follows:
 
-<code>
+```
 interface IHookResolver {
 
     // Custom error for incorrect resolver address or chain ID
     error UnknownHook(address expectedResolver, address providedResolver, uint256 expectedChainID, uint256 providedChainID);
 }
-</code>
+```
 
 ## Hook Function Parameters
 
@@ -81,9 +81,9 @@ It has become increasingly clear that ENS is more than just a domain name servic
 
 An example of using hooks with ENS is an ENS sub-protocol that resolves the votes of any ENS name. The hook could be resolved against the domain `votes.dao.eth`, and the hook itself could be:
 
-<code>
+```
 hook(0x123, "eth.dao.votes:vitalik.eth", 0xabc...234, 0x3c)
-</code>
+```
 
 `vitalik.eth` would be forward-resolved to obtain an L1 Ethereum address to look up the voting power based on ENS token delegations.
 
