@@ -23,7 +23,7 @@ The key words “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL 
 
 ## Hook Function Definition
 
-Hooks are similar to text records; however, they MUST make sure that the intented resolver and chainid are used for the hook. When using a Universal Resolver that supports the `get()` wrapper function, specified in [ENSIP: Get Wrapper Function](#), it can be used with the resolver address argument and chainId, to make sure the hook is always resolved from the correct resolver contract and on the correct chain.
+Hooks are similar to text records; however, they MUST make sure that the intented resolver and chainid are used for the hook. When using a Universal Resolver that supports the `get()` wrapper function, specified in [ENSIP: Wrapper Function for ENS Record Resolution](./ensip-TBD-9.md), it can be used with the resolver address argument and chainId, to make sure the hook is always resolved from the correct resolver contract and on the correct chain.
 
 The `hook` function is defined as:
 
