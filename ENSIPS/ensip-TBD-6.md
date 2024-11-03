@@ -27,9 +27,9 @@ Hooks are similar to text records; however, they MUST make sure that the intente
 
 The `hook` function is defined as:
 
-<code>
+```
 function hook(bytes32 node, string calldata key) public returns (string memory)
-</code>
+```
 
 ### Hook Function Parameters
 
@@ -47,22 +47,22 @@ To resolve a hook, clients MUST use make sure the hook is resolved using the int
 
 When documenting a hook for clients to resolve it is recommended that a hook be documented wrapped in a `get()` function, so that it is clear that the hook must be resolved using the specified resovler and chainid. 
 
-<code>
+```
 get(hook(0x123...abc, "eth.dao.votes:vitalik.eth"), 0x345...def, 1);
-</code>
+```
 
 For example, where, 0x123...abc is the node, 0x345...def is the resovler address, and 1 is the chain id. 
 
 
 An example of resolving a hook using the `get()` function:
 
-<code>
+```
 get(
     abi.encodeWithSignature("hook(bytes32,string)", node, key),
     resolverAddress,
     1, // Mainnet chain ID
 )
-</code>
+```
 
 # Rationale 
 
@@ -70,9 +70,9 @@ ENS serves as a universal onchain profile, but including verified onchain data i
 
 An example of using hooks with ENS is an ENS sub-protocol resolved using the name get-votes-protocol.eth that resolves the votes of any ENS name. The hook could be if called within a `get` wrapper function to make sure the correct resolver and chain id are used. 
 
-<code>
+```
 get(hook(0x123...abc, "eth.dao.votes:vitalik.eth"), 0x345...def, 1);
-</code>
+```
 
 `vitalik.eth` would be forward-resolved to obtain an Ethereum address to look up the voting power based on ENS token delegations.
 
