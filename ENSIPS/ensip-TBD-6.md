@@ -43,7 +43,7 @@ Hook keys have a format that includes two sequential parts. Part one must use th
 
 ### Resolving Hooks
 
-To resolve a hook, clients MUST use make sure the hook is resolved using the intented resolver address and chain id. When using a compatible UR, the `get()` wrapper function can be used, as specified in [ENSIP: Checked Wrapper Function](#), to wrap the hook with an intented resolver address and chainid, which makes sure the hook is not resolved on an unintented resolver. 
+To resolve a hook, clients MUST use make sure the hook is resolved using the intented resolver address and chain id. When using a compatible UR, the `get()` wrapper function can be used, as specified in ENSIP: Wrapper Function for ENS Record Resolution, to wrap the hook with an intented resolver address and chainid, which makes sure the hook is not resolved on an unintented resolver. 
 
 When documenting a hook for clients to resolve it is recommended that a hook be documented wrapped in a `get()` function, so that it is clear that the hook must be resolved using the specified resovler and chainid. 
 
