@@ -85,7 +85,7 @@ Clients MUST ensure that the arguments, i.e., address and chain ID, provided to 
 
 ## Backwards Compatibility
 
-Legacy clients that do not implement the `hook()` function will not be able to resolve records that require these checks, such as `text` and `contenthash`. This is intentional to ensure that only clients adhering to this ENSIP can resolve such records securely.
+Legacy clients that do not implement the `hook()` function will fail to resolve the underlying records, which is the intented result. This is intentional to ensure that only clients adhering to this ENSIP can resolve `hook()` wrapped records securely.
 
 # Copyright
 
