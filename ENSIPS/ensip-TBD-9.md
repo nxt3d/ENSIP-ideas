@@ -1,78 +1,35 @@
 ---
 ensip: TBD  
-title: Wrapper Function for ENS Record Resolution  
+title: Hooks for Secure Onchain Data Resolution and Onchain Agents  
 status: Idea  
 type: Standards Track  
-author: Prem Makeig (premm.eth) <premm@unruggable.com>, Raffy (@raffy.eth) <raffy@unruggable.com>  
+author: Prem Makeig (premm.eth) <premm@unruggable.com>, Raffy (@raffy@unruggable.com>  
 created: 2024-11-03  
 ---
 
 # Abstract 
 
-This ENSIP introduces the `get()` wrapper function, which wraps and validates calls to resolver functions such as `addr`, `text`, and `contenthash`. The `get()` function ensures that resolver addresses, chain IDs, ENS version numbers, and optional gateway URLs are checked to ensure that the expected values are used before a resolver function is executed. This allows clients to "lock" resolver records, ensuring that any relied-upon onchain records can't be changed by the user simply changing their resolver record on their ENS name. The `get` function should be implemented by any Universal Resolver. If a client is not using a Universal Resovler, it should follow the steps in this specification to unwrap resolver calls, wrapped in a `get` function. 
+This ENSIP introduces the `hook()` wrapper function, which wraps and validates calls to resolver functions such as `addr`, `text`, and `contenthash`. The `hook()` function ensures that the resolver address and chain ID are checked to confirm that the expected values are used before a resolver function is executed. This allows clients to "lock" resolver records, ensuring that any relied-upon onchain records can't be changed by the user simply changing their resolver record on their ENS name. The `hook()` function should be implemented by any Universal Resolver. If a client is not using a Universal Resolver, it should follow the steps in this specification to unwrap resolver calls wrapped in a `hook()` function.
 
 # Motivation
 
-ENS records like addresses, text records, and content hashes are critical for various applications. However, if a resolver changes unexpectedly, clients relying on these values may end up getting completely unexpected data. The `get()` function addresses this by enforcing checks on the resolver address, chain ID, version numbers, and gateway URLs of any offchain lookups before executing resolver functions. In the case of the ENS `hook` field, it is necessary to check the resolver address and chain ID of the hook before resolving the record.
+ENS records like addresses, text records, and content hashes are critical for various applications. However, if a resolver changes unexpectedly, clients relying on these values may end up getting completely unexpected data. The `hook()` function addresses this by enforcing checks on the resolver address and chain ID before executing resolver functions. 
 
 # Specification
 
 The key words “MUST”, “MUST NOT”, “REQUIRED”, etc., are to be interpreted as described in RFC 2119.
 
-## `get()` Function Definition
+## `hook()` Function Definition
 
-The `get()` function wraps calls to resolver functions, ensuring that specified checks are made. Overloaded versions of `get()` are included to provide flexibility.
+The `hook()` function wraps calls to resolver functions, ensuring that specified checks are made. 
 
 ### Function Signatures
 
 ```
-function get(
-    bytes calldata encodedFunction,
-    address resolver,
-    uint256 chainId,
-    string[] calldata urls,
-    uint256[] calldata versions
-) public returns (string memory)
-```
-
-```
-function get(
-    bytes calldata encodedFunction,
-    address resolver,
-    uint256 chainId,
-    string[] calldata urls
-) public returns (string memory)
-```
-
-```
-function get(
-    bytes calldata encodedFunction,
-    address resolver,
-    uint256 chainId,
-    uint256[] calldata versions
-) public returns (string memory)
-```
-
-```
-function get(
+function hook(
     bytes calldata encodedFunction,
     address resolver,
     uint256 chainId
-) public returns (string memory)
-```
-
-```
-function get(
-    bytes calldata encodedFunction,
-    string[] calldata urls,
-    uint256[] calldata versions
-) public returns (string memory)
-```
-
-```
-function get(
-    bytes calldata encodedFunction,
-    string[] calldata urls
 ) public returns (string memory)
 ```
 
@@ -81,60 +38,54 @@ function get(
 - **`encodedFunction`**: The ABI-encoded function call to the resolver function (e.g., `hook`, `addr`, `text`).
 - **`resolver`**: The address of the resolver contract that must be used.
 - **`chainId`**: The chain ID where the resolver resides.
-- **`urls`**: An array of URLs for any offchain lookups (used in CCIP-Read).
-- **`versions`**: An array of `uint256` specifying the allowed versions of the ENS protocol (ENSv2 is currently in development, and will be identified with the number 2).
 
 ### Usage: Universal Resolver
 
-Clients MUST use the `get()` function when resolving ENS records using a compatible Universal Resolver that require validation of one or more of the resolver address, chain ID, gateway URLs, and version numbers. When used with the address and chain ID parameters, this function ensures that the resolver has not changed unexpectedly and that the client is interacting with the correct contract on the correct chain. When the gateway URLs are used, the client knows exactly which gateway URLs can be used. If version numbers are used, the client knows up to which version of ENS can be used. When using other methods for resolving ENS names, such as libraries or custom methods, it is expected that wrapped ENS resolver methods will fail to resolve, and this is the intended result.
-
+Clients MUST use the `hook()` function when resolving ENS records using a compatible Universal Resolver that require validation of the resolver address and chain ID. This function ensures that the resolver has not changed unexpectedly and that the client is interacting with the correct contract on the correct chain. When using other methods for resolving ENS names, such as libraries or custom methods, it is expected that wrapped ENS resolver methods will fail to resolve, and this is the intended result.
 
 #### Example Usage
 
-Resolving a `hook` function using `get()` with all parameters:
+Resolving a `hook` function using `hook()`:
 
 ```
-get(
+hook(
     abi.encodeWithSignature("hook(bytes32,string)", node, key),
     resolverAddress,
-    1,        // Mainnet chain ID
-    ["https://example.com/hook-endpoint"], // Array of URLs
-    [2]       // Array of version numbers
+    1 // Mainnet chain ID
 )
 ```
 
-Resolving an `addr` function using `get()`:
+Resolving an `addr` function using `hook()`:
 
 ```
-get(
+hook(
     abi.encodeWithSignature("addr(bytes32)", node),
     resolverAddress,
-    1         // Mainnet chain ID
+    1 // Mainnet chain ID
 )
 ```
 
-Resolving a `text` function using `get()` with URLs:
+Resolving a `text` function using `hook()`:
 
 ```
-get(
+hook(
     abi.encodeWithSignature("text(bytes32,string)", node, key),
-    ["https://example.com/text-endpoint"] // Array of URLs
+    resolverAddress,
+    1 // Mainnet chain ID
 )
 ```
 
 ## Rationale 
 
-By enforcing checks on parameters such as the resolver address and chain ID, the `get()` function can prevent security issues that may arise from unexpected resolver changes. This is especially important for applications that rely on the permanence and integrity of onchain records. Clients in the past were not explicitly given permission to do these types of checks, and it therefore was not possible to resolve onchain text records securely because the name owner could change their resolver at any time, effectively changing the values of the onchain resolver records.
-
-Including arrays for URLs and version numbers allows clients to specify multiple acceptable gateways and versions, providing flexibility and redundancy.
+By enforcing checks on the resolver address and chain ID, the `hook()` function can prevent security issues that may arise from unexpected resolver changes. This is especially important for applications that rely on the permanence and integrity of onchain records. Clients in the past were not explicitly given permission to do these types of checks, and it therefore was not possible to resolve onchain text records securely because the name owner could change their resolver at any time, effectively changing the values of the onchain resolver records.
 
 ## Security Considerations
 
-Clients MUST ensure that the parameters provided to the `get()` function are correct and trusted. Incorrect parameters may lead to failed resolutions or security vulnerabilities. The `get()` function enhances security by making resolver validations explicit and mandatory for critical ENS record resolutions.
+Clients MUST ensure that the parameters provided to the `hook()` function are correct and trusted. Incorrect parameters may lead to failed resolutions or security vulnerabilities. The `hook()` function enhances security by making resolver validations explicit and mandatory for critical ENS record resolutions.
 
 ## Backwards Compatibility
 
-Legacy clients that do not implement the `get()` function will not be able to resolve records that require these checks, such as `hooks`. This is intentional to ensure that only clients adhering to this ENSIP can resolve such records securely.
+Legacy clients that do not implement the `hook()` function will not be able to resolve records that require these checks, such as `hooks`. This is intentional to ensure that only clients adhering to this ENSIP can resolve such records securely.
 
 # Copyright
 
