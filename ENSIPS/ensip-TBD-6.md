@@ -1,6 +1,6 @@
 ---
 ensip: TBD  
-title: Hooks for Secure Onchain Data Resolution and Onchain Agents  
+title: Hooks for Secure Onchain Data Resolution  
 status: Idea  
 type: Standards Track  
 author: Prem Makeig (premm.eth) <premm@unruggable.com>, Raffy (@raffy@unruggable.com>  
@@ -19,7 +19,7 @@ ENS records like addresses, text records, and content hashes are critical for va
 
 The key words “MUST”, “MUST NOT”, “REQUIRED”, etc., are to be interpreted as described in RFC 2119.
 
-## `hook()` Function Definition
+## hook() Function Definition
 
 The `hook()` function wraps calls to resolver functions, ensuring that specified checks are made. 
 
