@@ -9,7 +9,7 @@ created: 2024-11-03
 
 # Abstract 
 
-This ENSIP introduces the `hook()` wrapper function, which wraps and validates calls to resolver functions such as `addr`, `text`, and `contenthash`. The `hook()` function ensures that the resolver address and chain ID are checked to confirm that the expected values are used before a resolver function is executed. This allows clients to "lock" resolver records, ensuring that any relied-upon onchain records can't be changed by the user simply changing their resolver record on their ENS name. The `hook()` function should be implemented by any Universal Resolver. If a client is not using a Universal Resolver, it should follow the steps in this specification to unwrap resolver calls wrapped in a `hook()` function.
+This ENSIP introduces the `hook()` wrapper function, which wraps and validates calls to resolver functions such as `addr`, `text`, and `contenthash`. The `hook()` function ensures that the resolver address and chain ID are checked to confirm that the expected values are used before a resolver function is executed. This allows clients to "lock" resolver records, ensuring that any relied-upon onchain records can't be changed by the user simply changing their resolver record on their ENS name. The `hook()` function should be implemented by any Universal Resolver. 
 
 # Motivation
 
@@ -30,7 +30,7 @@ function hook(
     bytes calldata encodedFunction,
     address resolver,
     uint256 chainId
-) public returns (string memory)
+) 
 ```
 
 ### Parameters
