@@ -45,11 +45,21 @@ Clients MUST use the `hook()` function when resolving ENS records using a compat
 
 #### Example Usage
 
-Resolving a `hook` function using `hook()`:
+Resolving a `text` function using `hook()`:
 
 ```
 hook(
-    abi.encodeWithSignature("hook(bytes32,string)", node, key),
+    abi.encodeWithSignature("text(bytes32,string)", node, key),
+    resolverAddress,
+    1 // Mainnet chain ID
+)
+```
+
+Resolving a `contenthash` function using `contenthash()`:
+
+```
+hook(
+    abi.encodeWithSignature("contenthash(bytes32)", node, key),
     resolverAddress,
     1 // Mainnet chain ID
 )
@@ -60,16 +70,6 @@ Resolving an `addr` function using `hook()`:
 ```
 hook(
     abi.encodeWithSignature("addr(bytes32)", node),
-    resolverAddress,
-    1 // Mainnet chain ID
-)
-```
-
-Resolving a `text` function using `hook()`:
-
-```
-hook(
-    abi.encodeWithSignature("text(bytes32,string)", node, key),
     resolverAddress,
     1 // Mainnet chain ID
 )
