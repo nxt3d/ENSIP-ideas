@@ -35,13 +35,13 @@ function hook(
 
 ### Parameters
 
-- **`encodedFunction`**: The ABI-encoded function call to the resolver function (e.g., `hook`, `addr`, `text`).
+- **`encodedFunction`**: The ABI-encoded function call to the resolver function (e.g., `text`, `contenthash`, `addr`).
 - **`resolver`**: The address of the resolver contract that must be used.
 - **`chainId`**: The chain ID where the resolver resides.
 
 ### Usage: Universal Resolver
 
-Clients MUST use the `hook()` function when resolving ENS records using a compatible Universal Resolver that require validation of the resolver address and chain ID. This function ensures that the resolver has not changed unexpectedly and that the client is interacting with the correct contract on the correct chain. When using other methods for resolving ENS names, such as libraries or custom methods, it is expected that wrapped ENS resolver methods will fail to resolve, and this is the intended result.
+Clients MUST use the `hook()` function when resolving ENS records using a compatible Universal Resolver that require validation of the resolver address and chain ID. This function ensures that the resolver has not changed unexpectedly and that the client is interacting with the known contract on the correct chain. 
 
 #### Example Usage
 
@@ -81,11 +81,11 @@ By enforcing checks on the resolver address and chain ID, the `hook()` function 
 
 ## Security Considerations
 
-Clients MUST ensure that the parameters provided to the `hook()` function are correct and trusted. Incorrect parameters may lead to failed resolutions or security vulnerabilities. The `hook()` function enhances security by making resolver validations explicit and mandatory for critical ENS record resolutions.
+Clients MUST ensure that the arguments, i.e., address and chain ID, provided to the `hook()` function are correct and trusted. Incorrect values may lead to failed resolutions. The `hook()` function enhances security by making resolver validations explicit and mandatory for critical ENS record resolutions.
 
 ## Backwards Compatibility
 
-Legacy clients that do not implement the `hook()` function will not be able to resolve records that require these checks, such as `hooks`. This is intentional to ensure that only clients adhering to this ENSIP can resolve such records securely.
+Legacy clients that do not implement the `hook()` function will not be able to resolve records that require these checks, such as `text` and `contenthash`. This is intentional to ensure that only clients adhering to this ENSIP can resolve such records securely.
 
 # Copyright
 
