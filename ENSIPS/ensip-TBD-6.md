@@ -3,28 +3,44 @@ ensip: TBD
 title: Hooks for Secure Onchain Data Resolution  
 status: Idea  
 type: Standards Track  
-author: Prem Makeig (premm.eth) <premm@unruggable.com>, Raffy (@raffy@unruggable.com>  
+author: Prem Makeig (premm.eth) <premm@unruggable.com>, Raffy.eth <@raffy@unruggable.com>  
 created: 2024-10-07  
 ---
 
 # Abstract 
 
-This ENSIP introduces the `hook()` wrapper function, which wraps and validates calls to resolver functions such as `addr`, `text`, and `contenthash`. The `hook()` function ensures that the resolver address and chain ID are checked to confirm that the expected values are used before a resolver function is executed. This allows clients to "lock" resolver records, ensuring that any relied-upon onchain records can't be changed by the user simply changing their resolver record on their ENS name. The `hook()` function should be implemented by any Universal Resolver. 
+This ENSIP introduces Hooks, a new ENS resolution method, to securely resolve onchain data using ENS records. For example, with Hooks, it is possible to securely resolve the number of ENS token votes delegated to an ENS profile using a special text record.
 
 # Motivation
 
-ENS records like addresses, text records, and content hashes are critical for various applications. However, if a resolver changes unexpectedly, clients relying on these values may end up getting completely unexpected data. The `hook()` function addresses this by enforcing checks on the resolver address and chain ID before executing resolver functions. 
+The Name Wrapper, which is currently used for all newly registered .eth ENS names on L1 Ethereum, includes a feature called 'fuses', wherein a name owner can burn a fuse to permanently prevent updating the resolver record of their name. Preventing the resolver record from being updated allows, for example, text records to resolve onchain data securely. However, many owners of highly valued ENS names, such as the name of their own projects, are unwilling to burn any permanent fuses. The goal of this ENSIP is to find an alternative method to allow for the secure resolving of onchain records. Hooks allow clients to include a resolver address and chain ID that must be used to resolve ENS records, accomplishing the same degree of security as burning the SET_RESOLVER fuse in the Name Wrapper by ensuring that the resolver record matches the intended resolver record, while at the same time avoiding permanently affecting an ENS name by burning fuses.  
 
 # Specification
 
 The key words “MUST”, “MUST NOT”, “REQUIRED”, etc., are to be interpreted as described in RFC 2119.
 
-## hook() Function Definition
+## Using Hooks to Resolve ENS Records on 'Nameless' Resolvers
 
-The `hook()` function wraps calls to resolver functions, ensuring that specified checks are made. 
+Hooks are designed to securely resolve ENS records from known resolvers. Resolvers can be any smart contract that implements a `resolve` method and follows this ENSIP.
 
-### Function Signatures
+Hooks allow for resolving ENS records from a smart contract directly, with or without an associated ENS name. A hook comprises:
 
+1. A single ABI-encoded ENS resolver function, such as `text(bytes32 node, string key)` or `contenthash(bytes32 node)`.
+
+2. A resolver address.
+
+3. A chain ID.
+
+Clients may resolve hooks directly from a 'nameless' resolver (a resolver without an associated ENS name). All resolvers MUST implement the `IExtendedResolver` interface specified in ENSIP-10. To call a 'nameless' resolver, a client may leave the `name` argument of the `resolve(name, data)` function blank, such as `bytes("")`. The `data` field must contain the single ABI-encoded ENS resolver function call (as specified in ENSIP-1 and elsewhere), for example `text(node, key)`. The `resolve` function MUST either return valid return data for the specified function or revert if it is not supported.
+
+In some cases, it may be useful to compose a hook using function notation, such as:
+
+```
+hook(text(0x123...abc, "isOver18"), 0x234...bcd, 123...456)
+```
+
+
+### Hook Function
 ```
 function hook(
     bytes calldata encodedFunction,
@@ -32,6 +48,7 @@ function hook(
     uint256 chainId
 ) 
 ```
+The bytes value of the function selector for `hook()` is `0x8d74c3e9`.
 
 ### Parameters
 
@@ -39,16 +56,57 @@ function hook(
 - **`resolver`**: The address of the resolver contract that must be used.
 - **`chainId`**: The chain ID where the resolver resides.
 
-### Usage: Universal Resolver
+It is also possible to ABI-encode a hook function by encoding the `hook` function with the resolver function, resolver address, and chain ID as arguments, for compact storage either on or off-chain. However, when a client uses a `hook` with a nameless resolver, the client MUST call the ENS resolver function argument within the hook function on the specified resolver and chain ID and must not use the `hook` function as-is.  
 
-Clients MUST use the `hook()` function when resolving ENS records using a compatible Universal Resolver that require validation of the resolver address and chain ID. This function ensures that the resolver has not changed unexpectedly and that the client is interacting with the known contract on the correct chain. 
+## Using Hooks to Resolve ENS Records from an ENS Name **Without Using** a Universal Resolver
 
-#### Example Usage
+When a client resolves a record using the Hook resolution method without using a Universal Resolver, the client should follow the ENSIP-10 steps to: 
+
+1. Determine the resolver of the name using the steps of ENSIP-10.
+
+2. Check to ensure that the resolver address argument and chain ID of the hook matches the resolver of the name and verify that the resolver implements `IExtendedResolver` using the ERC-165 interface detection specified in ENSIP-10.
+
+3. If the resolver address and chain ID **does not** match the resolver of the name, or the resolver of the name does not implement the `IExtendedResolver` interface, do not resolve the ENS resolver function of the hook.
+
+4. Otherwise, call the `resolve` function of the resolver, using the single ABI-encoded ENS resolver function call as the `data` argument of the call and the DNS-encoded ENS name as the `name` argument, according to ENSIP-10.
+
+5. Get the result according to ENSIP-10, which may require performing an off-chain lookup according to ERC-3668, and also may require decoding according to the ENS resolver function return value type.  
+
+## Using Hooks to Resolve ENS Records from an ENS Name Using a Universal Resolver
+
+When resolving ENS records using a Universal Resolver that supports Hooks, the client MUST use the ABI-encoded `hook` function, wherein the ABI-encoded ENS resolver function is the first argument of the `hook` function, and the known resolver address and chain ID are the second and third arguments. The steps are:
+
+1. Call the `resolve(bytes calldata name, bytes calldata data) external view returns (bytes memory result, address resolver)` function of the Universal Resolver, where the `name` argument is the ENS name to resolve, and `data` is the ABI-encoded `hook` function including an ABI-encoded ENS resolver function as the `data` argument.
+
+2. Get the result, which may require performing an off-chain lookup according to ERC-3668. It may also be necessary to decode the result according to the ENS resolver function return value type.
+
+### Example Client Pseudocode Implementation
+
+Clients implementing this ENSIP must allow users to specify a hook that checks if the address and chain ID of the resolver match the expected values before resolving the ENS record.
+
+Example client call:
+
+```
+const textRecord = await resolver.hook(resolverAddress, chainId).text(node, key);
+```
+
+#### Explanation
+
+- **Functionality**: This function adds a `hook` to the `text` function call, ensuring that the `resolver` address and `chainId` match the provided values.
+- **Verification**: The client verifies:
+  - The `resolver` address obtained for the ENS name matches the `resolver` argument.
+  - The `chainId` provided matches the chain ID of the resolver.
+- **Purpose**: This ensures that the ENS record is only resolved if the specified resolver and chain ID match the `hook`, preventing any unexpected changes due to resolver modifications by the ENS name owner.
+
+
+
+#### Example of Encoded Functions for Use with a Universal Resolver
 
 Resolving a `text` function using `hook()`:
 
 ```
-hook(
+abi.encodeWithSignature(
+    "hook(bytes,address,uint256)",
     abi.encodeWithSignature("text(bytes32,string)", node, key),
     resolverAddress,
     1 // Mainnet chain ID
@@ -58,18 +116,9 @@ hook(
 Resolving a `contenthash` function using `contenthash()`:
 
 ```
-hook(
-    abi.encodeWithSignature("contenthash(bytes32)", node, key),
-    resolverAddress,
-    1 // Mainnet chain ID
-)
-```
-
-Resolving an `addr` function using `hook()`:
-
-```
-hook(
-    abi.encodeWithSignature("addr(bytes32)", node),
+abi.encodeWithSignature(
+    "hook(bytes,address,uint256)",
+    abi.encodeWithSignature("contenthash(bytes32)", node),
     resolverAddress,
     1 // Mainnet chain ID
 )
@@ -77,15 +126,15 @@ hook(
 
 ## Rationale 
 
-By enforcing checks on the resolver address and chain ID, the `hook()` function can prevent security issues that may arise from unexpected resolver changes. This is especially important for applications that rely on the permanence and integrity of onchain records. Clients in the past were not explicitly given permission to do these types of checks, and it therefore was not possible to resolve onchain text records securely because the name owner could change their resolver at any time, effectively changing the values of the onchain resolver records.
+By enforcing checks on the resolver address and chain ID, the `hook` function mitigates security risks associated with unexpected resolver changes. This is particularly critical for applications that depend on the security and integrity of onchain records. Previously, clients lacked explicit mechanisms to perform these checks, making it impossible to securely resolve onchain text records. A name owner could change their resolver at any time, effectively altering the values of the onchain resolver records.
 
 ## Security Considerations
 
-Clients MUST ensure that the arguments, i.e., address and chain ID, provided to the `hook()` function are correct and trusted. Incorrect values may lead to failed resolutions. The `hook()` function enhances security by making resolver validations explicit and mandatory for critical ENS record resolutions.
+Clients MUST ensure that the arguments, i.e., the address and chain ID, provided to the `hook` function are correct and trusted. Incorrect values may result in failed resolutions or incorrect results. The `hook` function enhances security by making resolver validations explicit and mandatory for critical ENS record resolutions.
 
 ## Backwards Compatibility
 
-Legacy clients that do not implement the `hook()` function will fail to resolve the underlying records, which is the intented result. This is intentional to ensure that only clients adhering to this ENSIP can resolve `hook()` wrapped records securely.
+Legacy Universal Resolvers that do not implement the `hook` function will fail to resolve the underlying records, which is the intended result. This ensures that only Universal Resolvers adhering to this ENSIP can securely resolve `hook`-wrapped records.
 
 # Copyright
 
