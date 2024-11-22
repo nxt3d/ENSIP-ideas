@@ -9,15 +9,15 @@ created: 2024-10-07
 
 # Abstract 
 
-This ENSIP introduces Hooks, a new ENS resolution method, to securely resolve onchain data using ENS records. For example, with Hooks, it is possible to securely resolve the number of ENS token votes delegated to an ENS profile using a special text record.
+This ENSIP introduces Hooks, a new ENS resolution method that enables the secure resolution of onchain data through ENS records. For example, Hooks make it possible to securely resolve the number of ENS token votes delegated to an ENS profile via a specialized text record, such as `"eth.ens.get-votes"`.
 
 # Motivation
 
-The Name Wrapper, which is currently used for all newly registered .eth ENS names on L1 Ethereum, includes a feature called 'fuses', wherein a name owner can burn a fuse to permanently prevent updating the resolver record of their name. Preventing the resolver record from being updated allows, for example, text records to resolve onchain data securely. However, many owners of highly valued ENS names, such as the name of their own projects, are unwilling to burn any permanent fuses. The goal of this ENSIP is to find an alternative method to allow for the secure resolving of onchain records. Hooks allow clients to include a resolver address and chain ID that must be used to resolve ENS records, accomplishing the same degree of security as burning the SET_RESOLVER fuse in the Name Wrapper by ensuring that the resolver record matches the intended resolver record, while at the same time avoiding permanently affecting an ENS name by burning fuses.  
+The Name Wrapper, currently used for all newly registered .eth ENS names on L1 Ethereum, includes a feature called 'fuses.' This allows a name owner to burn a fuse to permanently prevent updates to the resolver record of their name. Preventing resolver updates enables, for instance, secure resolution of text records with onchain data. However, many owners of high-value ENS names, such as those representing their projects, are hesitant to burn permanent fuses. The goal of this ENSIP is to propose an alternative method for securely resolving onchain records. Hooks allow clients to specify a resolver address and chain ID that must be used for resolving ENS records. This achieves the same level of security as burning the `CANNOT_SET_RESOLVER` fuse in the Name Wrapper by ensuring the resolver record matches the intended one, without requiring permanent modifications to the ENS name. 
 
 # Specification
 
-The key words “MUST”, “MUST NOT”, “REQUIRED”, etc., are to be interpreted as described in RFC 2119.
+The key words "MUST", "MUST NOT", "REQUIRED", etc., are to be interpreted as described in RFC 2119.
 
 ## Using Hooks to Resolve ENS Records on 'Nameless' Resolvers
 
@@ -39,7 +39,6 @@ In some cases, it may be useful to compose a hook using function notation, such 
 hook(text(0x123...abc, "isOver18"), 0x234...bcd, 123...456)
 ```
 
-
 ### Hook Function
 ```
 function hook(
@@ -48,6 +47,7 @@ function hook(
     uint256 chainId
 ) 
 ```
+
 The bytes value of the function selector for `hook()` is `0x8d74c3e9`.
 
 ### Parameters
@@ -98,11 +98,9 @@ const textRecord = await resolver.hook(resolverAddress, chainId).text(node, key)
   - The `chainId` provided matches the chain ID of the resolver.
 - **Purpose**: This ensures that the ENS record is only resolved if the specified resolver and chain ID match the `hook`, preventing any unexpected changes due to resolver modifications by the ENS name owner.
 
-
-
 #### Example of Encoded Functions for Use with a Universal Resolver
 
-Resolving a `text` function using `hook()`:
+Resolving a `text` function using `hook`:
 
 ```
 abi.encodeWithSignature(
@@ -113,7 +111,7 @@ abi.encodeWithSignature(
 )
 ```
 
-Resolving a `contenthash` function using `contenthash()`:
+Resolving a `contenthash` function using `hook`:
 
 ```
 abi.encodeWithSignature(
