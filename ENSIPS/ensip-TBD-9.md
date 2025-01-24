@@ -103,8 +103,7 @@ Any resolver implementing [ENSIP-9](#) can immediately support arbitrary data by
 
 ## Security Considerations
 
-- Data stored in this manner is not encrypted; anything placed onchain is publicly accessible.
-- If large amounts of data must be stored, gas costs may be prohibitive. Offchain references (e.g., IPFS content hashes) are recommended.
+None.
 
 ## Conclusion
 
