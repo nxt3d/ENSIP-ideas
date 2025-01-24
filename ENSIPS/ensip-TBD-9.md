@@ -1,7 +1,9 @@
 ---
+ensip: TBD
 title: ENSIP-XX: Arbitrary Data Storage in the Multichain Address Field
+status: Idea
+type: Core
 author: Prem Makeig (premm.eth) <premm@unruggable.com>, raffy.eth <raffy@unruggable.com>
-status: Draft
 created: 2025-01-24
 ---
 
