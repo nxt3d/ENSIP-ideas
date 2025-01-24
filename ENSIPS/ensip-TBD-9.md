@@ -1,9 +1,7 @@
 ---
 title: ENSIP-XX: Arbitrary Data Storage in the Multichain Address Field
 author: Prem Makeig (premm.eth) <premm@unruggable.com>, raffy.eth <raffy@unruggable.com>
-discussions-to: <URL>
 status: Draft
-type: <Standards Track, Meta, or Informational>
 created: 2025-01-24
 ---
 
