@@ -94,7 +94,7 @@ This ENSIP is backward compatible, as it uses the same function signatures from 
 
 ## Backwards Compatibility
 
-- This proposal does not break existing usage of the `addr(uint256)` function. It simply adds a new convention for choosing the `coinType` value.
+- This proposal does not break existing usage of the `addr()` function. It simply adds a new convention for choosing the `coinType` value.
 - Ensures smooth coexistence with purely SLIP-44 coin-based addresses.
 
 ## Implementation
