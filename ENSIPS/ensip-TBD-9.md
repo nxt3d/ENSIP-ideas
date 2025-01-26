@@ -1,61 +1,73 @@
 ---
-ensip: TBD
 title: Arbitrary Data Storage in the Multichain Address Field
+author: Prem Makeig (premm.eth) <premm@unruggable.com>, raffy.eth <raffy@unruggable.com>
+discussions-to: <URL>
 status: Idea
-type: Core
-author: Prem Makeig (premm.eth) <premm@unruggable.com>, raffy.eth 
 created: 2025-01-24
 ---
 
 ## Abstract
 
-This ENSIP proposes an expanded use of the existing `addr(bytes32 node, uint256 coinType)` record to store arbitrary data as bytes. Under [ENSIP-9](#), `coinType` is specified as a [SLIP-44](https://github.com/satoshilabs/slips/blob/master/slip-0044.md) index, and the returned bytes represent an address for the specified blockchain. However, this proposal extends `coinType` usage so that any arbitrary data can be keyed by a `uint256` value. Specifically, by hashing a descriptive string key using `keccak256(key)`, the resulting `uint256` can serve as the `coinType`, while the associated `bytes` represent arbitrary or unstructured data.
+This ENSIP proposes an expanded use of the existing `addr(bytes32 node, uint256 key)` ENS name resolver field to store arbitrary data as bytes. Building on [ENSIP-9](#), this proposal introduces a hash-based approach for generating a `key` using the following function: 
+
+```
+function keyGen(string memory x) pure returns (uint256) {
+    return (uint256(keccak256(bytes(x))) - 1) << 32;
+}
+```
+
+This `key` generation approach avoids conflicts with [ENSIP-9](#) as well as [ENSIP-11](#). It is possible that in the future coinTypes will be derived using a similar hash based function to accommodate large numbers of coinTypes. However, the key generation of this ENSIP will also not conflict with possible future coinType addressing schemes using hashes because of the extremely low chance of collisions of large hashes. Adding an additional function to handle bytes retrieval was considered. However, we believe that the `addr` function is sufficient for retrieving arbitrary `bytes` data (```addr(node, keyGen(key))```), as well as the `setAddr` to store arbitrary `bytes` data (```setAddr(node, keyGen(key), data)```).
 
 ## Motivation
 
-ENS currently has a single dedicated record for storing content, the `contenthash` record (see [ENSIP-7](#)), which encodes web or content address data as a multicodec. However, as new use cases emerge—particularly involving AI, where an ENS name may need to store rich contextual data, chat logs, or agent instructions—there is a desire to use richer record types that can store unstructured binary data.
+ENS currently has a single dedicated record for storing multimedia content, the `contenthash` record (see [ENSIP-7](#)), which encodes web or content address data as a [multicodec](https://github.com/multiformats/multicodec). However, as new use cases emerge—particularly involving AI, where an ENS name may need to store rich contextual data, AI agent graphs, or agent workflows—there is a desire to use richer record types that can store unstructured binary data. While this ENSIP does not specify the types of data that may be used, it is possible, for example, to imagine multicodec records representing IPFS CIDs, URIs, and dataURLs.
 
-While ENS does support `text` records ([ENSIP-5](#)), these are intended for human-readable text data and are limited to key-value string pairs. The `addr` record already allows for arbitrary bytes in the second parameter (see [ENSIP-9](#)), but it is tied to SLIP-44 coin type identifiers. By superseding and reinterpreting the `coinType` parameter in this ENSIP as a `keccak256` hash of a descriptive string, the existing resolution methods can store and return any arbitrary bytes under a convenient key scheme. For instance, `aiContext` might become `coinType = uint256(keccak256("aiContext"))`, and the stored bytes can represent AI agent parameters, chain-of-thought, or other binary data.
-
-This extension allows:
-
-1. Backward compatibility with current libraries and resolvers that already use the `addr` interface.
-2. A robust mechanism for developers to attach arbitrary data to ENS names without introducing a new record type.
-3. The possibility for advanced AI or automation workflows, where AI agents or other services query an ENS name for structured or unstructured data keyed by descriptive strings.
+While ENS does support `text` records ([ENSIP-5](#)), these are intended for human-readable text data and are limited to key-value string pairs. The `addr` field already allows for storing arbitrary `bytes` values (see [ENSIP-9](#)). By introducing arbitrary key-value pairs in this ENSIP, developers can take advantage of the existing functionality of the `addr` field. For instance, `keyGen("aiContext")` generates a unique key that could be used to store a context as part of an AI agent, as pre-context for LLM prompts.
 
 ## Specification
 
+The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in RFC 2119 and RFC 8174.
+
 ### Overview
 
-Instead of using the SLIP-44 coin type (e.g., 60 for Ethereum), a user can derive a `coinType` by `keccak256(keyString)`. For example, `coinType = uint256(keccak256("aiContext"))`.
-
-The resolver function remains as defined in [ENSIP-9](#):
+To generate a `uint256` key according to this ENSIP, the following function MUST be used, where a descriptive string `x` is input and a `uint256` key is the output:
 
 ```
-function setAddr(bytes32 node, uint coinType, bytes calldata a) external;
-function addr(bytes32 node, uint coinType) external view returns (bytes memory);
+function keyGen(string memory x) pure returns (uint256) {
+    return (uint256(keccak256(bytes(x))) - 1) << 32;
+}
 ```
 
-Users call `setAddr(node, keccak256("myKeyString"), myBytesData)` to store arbitrary data. Clients retrieve the data via `addr(node, keccak256("myKeyString"))`.
-
-A resolver that already implements [ENSIP-9](#) can transparently support this proposal. There is no change to the onchain storage or function signatures. The only difference is that the `coinType` integer is now used for a key that is not necessarily a SLIP-44 ID. Resolvers MUST emit the same event used for addresses:
+To store data, the function `setAddr` is used: 
 
 ```
-event AddressChanged(bytes32 indexed node, uint coinType, bytes newAddress);
+setAddr(node, keyGen("keyName"), data);
 ```
 
-The concept of “coin type 60 (Ethereum) must reflect the `addr(bytes32)` function in [ENSIP-1](#) still applies, but it remains unaffected by the additional usage for hashed keys.
+To retrieve data, the function `addr` is used:
+
+```
+addr(node, keyGen("keyName"));
+```
+
+Resolvers that already implement [ENSIP-9](#) are compatible with this approach, as no changes to onchain storage or function signatures are required. 
+
+Resolvers MUST emit the same event used for addresses:
+
+```
+event AddressChanged(bytes32 indexed node, uint key, bytes newAddress);
+```
 
 ### Example
 
-Below is an illustrative snippet that shows how to set and retrieve arbitrary data with a hashed string key:
+Below is an illustrative snippet that shows how to set and retrieve arbitrary data with `keyGen`:
 
 ```
 pragma solidity ^0.8.0;
 
 interface IExtendedResolver {
-    function setAddr(bytes32 node, uint256 coinType, bytes calldata data) external;
-    function addr(bytes32 node, uint256 coinType) external view returns (bytes memory);
+    function setAddr(bytes32 node, uint256 key, bytes calldata data) external;
+    function addr(bytes32 node, uint256 key) external view returns (bytes memory);
 }
 
 contract ExampleUsage {
@@ -65,14 +77,18 @@ contract ExampleUsage {
         resolver = IExtendedResolver(resolverAddress);
     }
 
+    function keyGen(string memory x) public pure returns (uint256) {
+        return (uint256(keccak256(bytes(x))) - 1) << 32;
+    }
+
     function storeArbitraryData(bytes32 node, string memory key, bytes memory data) public {
-        uint256 hashedKey = uint256(keccak256(abi.encodePacked(key)));
-        resolver.setAddr(node, hashedKey, data);
+        uint256 generatedKey = keyGen(key);
+        resolver.setAddr(node, generatedKey, data);
     }
 
     function retrieveArbitraryData(bytes32 node, string memory key) public view returns (bytes memory) {
-        uint256 hashedKey = uint256(keccak256(abi.encodePacked(key)));
-        return resolver.addr(node, hashedKey);
+        uint256 generatedKey = keyGen(key);
+        return resolver.addr(node, generatedKey);
     }
 }
 ```
@@ -90,16 +106,15 @@ In this example:
 
 ### Rationale
 
-This ENSIP is backward compatible, as it uses the same function signatures from [ENSIP-9](#), requiring no changes to existing tooling or libraries that support `addr(bytes32, uint256)`. Although collisions are theoretically possible due to the hashing of keys, they are improbable with `keccak256`. Implementors should adopt naming schemes, such as namespace-qualified keys (e.g., "eth.vitalik.key"), to avoid collisions. Reusing the `addr` mapping is gas-efficient, with minimal additional overhead, while allowing developers to flexibly store structured or unstructured data. Compared to `text` records ([ENSIP-5](#)), this proposal is better suited for large or binary data, enabling robust and versatile data storage mechanisms.
+ENS names have become widely used as identifiers, with the primary use case of user IDs. We believe that a new use case is imminent, namely identifiers for AI agents. AI agents often need access to rich data, including text and images, which could be in the form of a PDF document, for example, to use as part of the context of prompts that bring the AI agent to life. The development of AI agents is still nascent, but it is clear that in order for an ENS name to represent the identity of an AI agent, it is necessary to store data beyond the existing `contenthash` field, which is broadly understood to be used in the context of web browsers.
+
+One approach that was considered was creating a two-dimensional `contentHash` field, such as `hash(bytes32 node, string key) returns (bytes)`. For example, it would be possible to have an `aicontext` key used to retrieve a media file stored as `bytes`. However, a new field would be incompatible with existing resolvers and would also require clients to be updated. This is a significant hurdle to adoption.
+
+It is already possible to use the existing resolver field `addr` to store arbitrary `bytes`, but there is currently no existing standard. With this ENSIP, it is possible to use the existing `addr` field in a generic way to support any type of application, including AI agents. For most applications, data can be stored offchain or in a content-addressable storage system (e.g., IPFS or Arweave), with only references stored onchain. This ENSIP does not specify the ways in which the `bytes` data is encoded, leaving it intentionally unspecified so that future use cases can be developed for specific applications.
 
 ## Backwards Compatibility
 
-- This proposal does not break existing usage of the `addr()` function. It simply adds a new convention for choosing the `coinType` value.
-- Ensures smooth coexistence with purely SLIP-44 coin-based addresses.
-
-## Implementation
-
-Any resolver implementing [ENSIP-9](#) can immediately support arbitrary data by interpreting the `coinType` parameter as either a SLIP-44 coin type or a hashed string key. The recommended practice is to store large data offchain or in a content-addressable storage if needed (e.g., IPFS or Arweave) and only store references onchain, similar to existing best practices.
+This proposal does not break existing usage of the `addr` function. It ensures smooth coexistence with current implementations under [ENSIP-9](#) by adopting the same interface and event definitions.
 
 ## Security Considerations
 
@@ -107,4 +122,4 @@ None.
 
 ## Conclusion
 
-This ENSIP expands the `addr(bytes32,node, uint256 coinType)` usage beyond SLIP-44 coin types to store arbitrary bytes keyed by `keccak256` hashes of descriptive strings. It preserves backward compatibility with existing ENS resolution libraries, opening new possibilities for AI-based context storage, complex workflows, and any future applications requiring rich data records on ENS.
+This ENSIP expands the `addr(bytes32,node, uint256 key)` usage by introducing a structured key. It preserves backward compatibility with existing ENS resolution libraries and provides a flexible mechanism for storing and organizing rich data records in ENS names.
