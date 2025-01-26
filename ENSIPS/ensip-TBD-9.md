@@ -65,16 +65,29 @@ Below is an illustrative snippet that shows how to set and retrieve arbitrary da
 ```
 pragma solidity ^0.8.0;
 
-interface IExtendedResolver {
+interface IAddressResolver {
+    event AddressChanged(
+        bytes32 indexed node,
+        uint256 coinType,
+        bytes newAddress
+    );
+
+    function addr(
+        bytes32 node,
+        uint256 coinType
+    ) external view returns (bytes memory);
+}
+
+interface Resolver is IAddressResolver {
     function setAddr(bytes32 node, uint256 key, bytes calldata data) external;
     function addr(bytes32 node, uint256 key) external view returns (bytes memory);
 }
 
 contract ExampleUsage {
-    IExtendedResolver public resolver;
+    Resolver public resolver;
 
     constructor(address resolverAddress) {
-        resolver = IExtendedResolver(resolverAddress);
+        resolver = Resolver(resolverAddress);
     }
 
     function keyGen(string memory x) public pure returns (uint256) {
