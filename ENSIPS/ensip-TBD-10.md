@@ -86,7 +86,7 @@ This allows agents to understand token amounts and execute contextual actions ac
 
 The format improves semantic clarity, agent compatibility, and visual expressiveness. It works alongside ENS infrastructure, leveraging ENS `text` records and `contenthash` for resolution. Unlike tightly packed formats like CAIP-10 or DIDs, this prioritizes readability and contextuality.
 
-It is also backward-compatible with ENS, as all parts are optional and can be parsed using existing resolution logic.
+It is also backward-compatible with ENS, as all parts after the first part—an ENS name or address—are optional and can be parsed using existing resolution logic.
 
 ## Backwards Compatibility
 
