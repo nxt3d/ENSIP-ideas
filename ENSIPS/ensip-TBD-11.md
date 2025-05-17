@@ -19,7 +19,7 @@ ENS is a globally recognized, tokenized naming system whose ownership is verifia
 ### Text Record Key
 
 * **Key**: `root-context`
-* **Description**: Text in UTF-8 format for a manifest that outlines one or more interfaces (for example, `chat`, `agent`, `data`) plus any supporting metadata.
+* **Value**: Text in UTF-8 format for a manifest that outlines one or more interfaces (for example, `chat`, `agent`, `data`) plus any supporting metadata.
 * **Expected Format**: Plain text, YAML, JSON, or other standard formats designed for LLM context.
 
 The key **MUST** be published via `text(bytes32,string)` as defined in ENSIP‑5. Implementers MAY embed multiple interfaces in a single manifest; each interface can be described in natural language or structured metadata.
