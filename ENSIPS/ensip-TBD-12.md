@@ -1,6 +1,6 @@
 ---
-title: Draft Number Assignment for ENSIPs  
-author: Prem Makeig (premm.eth) <premm@unruggable.com>  
+title: Drafting and Number Assignment for ENSIPs 
+author: Prem Makeig (premm.eth) <premm@unruggable.com>, Steve Katzman (katzman.base.eth)  
 discussions-to: <URL>
 status: Idea  
 created: 2025-05-17  
@@ -8,13 +8,15 @@ created: 2025-05-17
 
 ## Abstract
 
-This ENSIP defines a minimal and consistent process for assigning draft numbers to new ENSIPs. Its goal is to simplify the early stages of ENSIP development by ensuring that contributors can reference and track work-in-progress proposals using clearly defined identifiers.
+This ENSIP describes how ENSIPs are proposed and how draft numbers are assigned. It specifies how contributors can submit proposals, draft numbers are allocated, and proposal statuses are managed. The process encourages open participation, community discussion, and coordination across the ENS ecosystem.
 
 ## Motivation
 
 The ENS ecosystem has grown to include a wide variety of contributors in different domains. Having a standard for assigning ENSIP draft numbers makes it easier for authors to share and build momentum around their proposals, helping them gain visibility and community support early in the process. A simple and predictable mechanism is needed to support the early development and discussion of new ENSIPs.
 
 ## Specification
+
+ENSIPs can be drafted by anyone. Once accepted by the editors, they enter the Draft state and are assigned the next available number. After formal review, ENSIPs may progress to the Final status. This review may include a period of community adoption. It should also include public discussion, such as starting a thread on the [discuss.ens.domains](https://discuss.ens.domains) forum to gather community feedback. If a proposal is rejected or withdrawn, its pull request will be closed and the ENSIP marked as Closed.
 
 When a contributor wishes to start a new ENSIP, they may open a pull request in the ENSIPs repository with a title that accurately describes the content. This file name will be updated once an ENSIP number is assigned. The ENSIP editors will review the proposal and, if accepted as a draft ENSIP, assign it a canonical number by renaming the file to `ensip-XXX.md`, where `XXX` is the next available ENSIP number.
 
