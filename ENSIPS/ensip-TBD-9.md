@@ -16,13 +16,13 @@ function keyGen(string memory x) pure returns (uint256) {
 }
 ```
 
-This `key` generation approach avoids conflicts with [ENSIP-9](#) as well as [ENSIP-11](#). It is possible that in the future coinTypes will be derived using a similar hash based function to accommodate large numbers of coinTypes. However, the key generation of this ENSIP will also not conflict with possible future coinType addressing schemes using hashes because of the extremely low chance of collisions of large hashes. Adding an additional function to handle bytes retrieval was considered. However, we believe that the `addr` function is sufficient for retrieving arbitrary `bytes` data (```addr(node, keyGen(key))```), as well as the `setAddr` to store arbitrary `bytes` data (```setAddr(node, keyGen(key), data)```).
+This `key` generation approach avoids conflicts with [ENSIP-9](https://github.com/ensdomains/ensips/blob/master/ensips/9.md) as well as [ENSIP-11](https://github.com/ensdomains/ensips/blob/master/ensips/11.md). It is possible that in the future coinTypes will be derived using a similar hash based function to accommodate large numbers of coinTypes. However, the key generation of this ENSIP will also not conflict with possible future coinType addressing schemes using hashes because of the extremely low chance of collisions of large hashes. Adding an additional function to handle bytes retrieval was considered. However, we believe that the `addr` function is sufficient for retrieving arbitrary `bytes` data (```addr(node, keyGen(key))```), as well as the `setAddr` to store arbitrary `bytes` data (```setAddr(node, keyGen(key), data)```).
 
 ## Motivation
 
-ENS currently has a single dedicated record for storing multimedia content, the `contenthash` record (see [ENSIP-7](#)), which encodes web or content address data as a [multicodec](https://github.com/multiformats/multicodec). However, as new use cases emerge—particularly involving AI, where an ENS name may need to store rich contextual data, AI agent graphs, or agent workflows—there is a desire to use richer record types that can store unstructured binary data. While this ENSIP does not specify the types of data that may be used, it is possible, for example, to imagine multicodec records representing IPFS CIDs, URIs, and dataURLs.
+ENS currently has a single dedicated record for storing multimedia content, the `contenthash` record (see [ENSIP-7](https://github.com/ensdomains/ensips/blob/master/ensips/7.md)), which encodes web or content address data as a [multicodec](https://github.com/multiformats/multicodec). However, as new use cases emerge—particularly involving AI, where an ENS name may need to store rich contextual data, AI agent graphs, or agent workflows—there is a desire to use richer record types that can store unstructured binary data. While this ENSIP does not specify the types of data that may be used, it is possible, for example, to imagine multicodec records representing IPFS CIDs, URIs, and dataURLs.
 
-While ENS does support `text` records ([ENSIP-5](#)), these are intended for human-readable text data and are limited to key-value string pairs. The `addr` field already allows for storing arbitrary `bytes` values (see [ENSIP-9](#)). By introducing arbitrary key-value pairs in this ENSIP, developers can take advantage of the existing functionality of the `addr` field. For instance, `keyGen("aiContext")` generates a unique key that could be used to store a context as part of an AI agent, as pre-context for LLM prompts.
+While ENS does support `text` records ([ENSIP-5](https://github.com/ensdomains/ensips/blob/master/ensips/5.md)), these are intended for human-readable text data and are limited to key-value string pairs. The `addr` field already allows for storing arbitrary `bytes` values (see [ENSIP-9](https://github.com/ensdomains/ensips/blob/master/ensips/9.md)). By introducing arbitrary key-value pairs in this ENSIP, developers can take advantage of the existing functionality of the `addr` field. For instance, `keyGen("aiContext")` generates a unique key that could be used to store a context as part of an AI agent, as pre-context for LLM prompts.
 
 ## Specification
 
@@ -50,7 +50,7 @@ To retrieve data, the function `addr` is used:
 addr(node, keyGen("keyName"));
 ```
 
-Resolvers that already implement [ENSIP-9](#) are compatible with this approach, as no changes to onchain storage or function signatures are required. 
+Resolvers that already implement [ENSIP-9](https://github.com/ensdomains/ensips/blob/master/ensips/9.md) are compatible with this approach, as no changes to onchain storage or function signatures are required. 
 
 Resolvers MUST emit the same event used for addresses:
 
