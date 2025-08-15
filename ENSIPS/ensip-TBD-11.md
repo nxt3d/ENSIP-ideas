@@ -41,6 +41,48 @@ Each interface is *discoverable* through the manifest, so no additional ENS text
 3. Parse the manifest to select an interface that matches the client’s capabilities (for example, chat or agent).
 4. Proceed according to the manifest’s instructions: initializing an LLM, loading tools, displaying UI hints, or fetching datasets.
 
+### ENS Tool Calling *(example)*
+The root-context record can specify executable tools and functions that AI systems can invoke when interacting with the name. These tools are defined using a standardized JSON format:
+```json
+{
+    "systemPrompt": "This AI can check the ENS balance of an Ethereum address",
+    "tools": [
+        {
+            "name": "getEnsBalanceTool",
+            "description": "Fetch the ENS token balance for a given Ethereum address.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "address": {
+                        "type": "string",
+                        "description": "Ethereum address to check ENS token balance for (0x...)."
+                    }
+                },
+                "required": [
+                    "address"
+                ]
+            },
+            "execution": "import { createPublicClient, http, parseAbi, formatUnits } from 'viem';\nimport { mainnet } from 'viem/chains';\n\nconst ENS_TOKEN_CONTRACT = '0xC18360217D8F7Ab5e7c516566761Ea12Ce7F9D72';\nconst erc20Abi = parseAbi([\n  'function balanceOf(address owner) view returns (uint256)'\n]);\n\nexport async function main(args) {\n  const client = createPublicClient({\n    chain: mainnet,\n    transport: http('https://eth.drpc.org')\n  });\n\n  const balance = await client.readContract({\n    address: ENS_TOKEN_CONTRACT,\n    abi: erc20Abi,\n    functionName: 'balanceOf',\n    args: [args.address]\n  });\n\n  const formattedBalance = formatUnits(balance, 18);\n  return { ensBalance: formattedBalance };\n}"
+        }
+    ]
+}
+```
+These tool definitions are executed server-side in a sandboxed environment as standalone isolated functions to minimize attack vectors. The sandbox environment explicitly limits library access, exposing only a curated set of permitted dependencies. Specifically:
+
+- Purpose-built blockchain libraries (like `viem`, `ethers.js`, ENS-specific SDKs)
+- General data handling utilities and formatters
+- Controlled network access for data fetching with rate limiting
+- No access to file system, operating system commands, or arbitrary package installation
+
+When an LLM client encounters this functionality in the `root-context`, it can:
+
+1. Parse the tool definitions
+2. Present appropriate UI for invoking the tools
+3. Execute the tools in a secure runtime
+4. Return results to the LLM for further processing
+
+This approach extends ENS names beyond static identifiers into functional endpoints that AI systems can interact with programmatically, while maintaining security boundaries between execution environments.
+
 ### Backwards Compatibility
 
 Unaware clients will simply ignore the new key; existing behavior is unaffected.
