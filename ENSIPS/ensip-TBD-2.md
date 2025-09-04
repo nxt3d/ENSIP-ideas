@@ -62,6 +62,15 @@ e.g. "eth.vitalik:dataURL"
 
 Format: `uvarint(codec2) + <ABI encoded 'hook' function call as bytes>`
 
+## Data URL Resolver Contract
+
+A Data URL compliant IExtendedResolver contract is an ENSIP-TBD-6 compliant contract that responds to the Data URL `hook` and implements the `getCacheControlNonce` function. Applications that consume the Data URL may optionally use the return value (the cache control nonce) to create the composite cache key (node,key,resolver,coinType,nonce) to invalidate cached values.
+
+`getCacheControlNonce(bytes32 node) public view returns (uint256)`
+
+It is suggested that the cache control nonce serve as an incremented counter for updates to infrequently updated content, and that continuously updated content should have a cache control nonce equal to the current block number.
+
+
 ## Web Gateway Resolution (e.g. eth.limo)
 
 **URI:** 
@@ -78,7 +87,9 @@ A reasonable limit may be placed by clients on the number of characters in the U
 
 * The HTTP response MUST be of `Content-type: $MIME`.
 
-When resolving Data URLs, the URL of the request to the gateway is only used to determine the ENS name. Any path or query data of the request URL is ignored. For example `https://name.eth.limo` returns the same data URL as `https://name.eth.limo/a/b/c`. Single page applications (SPA) that are resovled in the browser may use the path information if necesasry to modify the view of the SPA. 
+When resolving Data URLs, the URL of the request to the gateway is only used to determine the ENS name. Any path or query data of the request URL is ignored. For example `https://name.eth.limo` returns the same data URL as `https://name.eth.limo/a/b/c`. Single page applications (SPA) that are resovled in the browser may use the path information if necesasry to modify the view of the SPA.
+
+Gateways may use the value returned by `getCacheControlNonce(node)` to determine caching strategies and invalidation at their own discretion. Exceptions thrown when calling `getCacheControlNonce` are undefined behavior.
 
 # Rationale 
 
